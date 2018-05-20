@@ -1,18 +1,18 @@
-/* 
+/*
  * This file is part of the RootShell Project: http://code.google.com/p/RootShell/
- *  
+ *
  * Copyright (c) 2014 Stephen Erickson, Chris Ravenscroft
- *  
+ *
  * This code is dual-licensed under the terms of the Apache License Version 2.0 and
  * the terms of the General Public License (GPL) Version 2.
  * You may use this code according to either of these licenses as is most appropriate
  * for your project on a case-by-case basis.
- * 
+ *
  * The terms of each license can be found in the root directory of this project's repository as well as at:
- * 
+ *
  * * http://www.apache.org/licenses/LICENSE-2.0
  * * http://www.gnu.org/licenses/gpl-2.0.txt
- *  
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under these Licenses is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -58,7 +58,8 @@ public class Shell {
         SYSTEM_APP("u:r:system_app:s0"), // System apps
         PLATFORM_APP("u:r:platform_app:s0"), // System apps
         UNTRUSTED_APP("u:r:untrusted_app:s0"), // Third-party apps
-        RECOVERY("u:r:recovery:s0"); //Recovery
+        RECOVERY("u:r:recovery:s0"), //Recovery
+        SUPERSU("u:r:supersu:s0"); //SUPER SU default
 
         private String value;
 
@@ -595,20 +596,24 @@ public class Shell {
                     if (write < commands.size()) {
                         isExecuting = true;
                         Command cmd = commands.get(write);
-                        cmd.startExecution();
-                        RootShell.log("Executing: " + cmd.getCommand() + " with context: " + shellContext);
 
-                        //write the command
-                        outputStream.write(cmd.getCommand());
-                        outputStream.flush();
+                        if(null != cmd)
+                        {
+                            cmd.startExecution();
+                            RootShell.log("Executing: " + cmd.getCommand() + " with context: " + shellContext);
 
-                        //write the token...
-                        String line = "\necho " + token + " " + totalExecuted + " $?\n";
-                        outputStream.write(line);
-                        outputStream.flush();
+                            //write the command
+                            outputStream.write(cmd.getCommand());
+                            outputStream.flush();
 
-                        write++;
-                        totalExecuted++;
+                            //write the token...
+                            String line = "\necho " + token + " " + totalExecuted + " $?\n";
+                            outputStream.write(line);
+                            outputStream.flush();
+
+                            write++;
+                            totalExecuted++;
+                        }
                     } else if (close) {
                         /**
                          * close the thread, the shell is closing.
